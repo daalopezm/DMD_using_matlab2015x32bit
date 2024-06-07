@@ -25,14 +25,6 @@ else
     disp('Failed to clear FIFO buffers.');
 end
 
-% Load control flags
-result = calllib('D4100_usb', 'LoadControl', deviceNumber);
-if result == 1
-    disp('Control flags loaded successfully.');
-else
-    disp('Failed to load control flags.');
-end
-
 % Example data for DLP650LNIR, assuming 16 blocks of 50 rows each (total 800 rows)
 % and 1280 micromirrors per row. Total data size is 800 * 1280 bytes = 1,024,000 bytes.
 totalRows = 16 * 50;
@@ -40,22 +32,49 @@ rowSize = 1280;
 chunkSize = 50 * rowSize;  % 64 KB chunks for DLP650LNIR
 
 % Generate random data to simulate the row data
-rowData = uint8(randi([0, 255], 1, totalRows * rowSize));
-
+%rowData = uint8(randi([0, 255], totalRows * rowSize, 1));
+rowData0 = uint8(0 * ones(1, totalRows * rowSize));
+rowData1 = uint8(255 * ones(1, totalRows * rowSize));
 % Get DMD type
 DMDType = calllib('D4100_usb', 'GetDMDTYPE', deviceNumber);  % Example value for DLP650LNIR, replace with actual DMD type
 
-% Load data into the DMD in chunks of 64 KB
-for i = 1:chunkSize:length(rowData)
-    chunk = rowData(i:min(i + chunkSize - 1, end));
-    length = uint32(length(chunk));
+% Number of times to repeat the loop
+N = 15;
+
+% Repeat the loop N times
+for n = 1:N
+    disp(['Iteration ', num2str(n), ' of ', num2str(N)]);
+    % Load data into the DMD in chunks of 64 KB
     
-    result = calllib('D4100_usb', 'LoadData', chunk, length, DMDType, deviceNumber);
-    if result == 1
-        disp(['Data chunk starting at index ', num2str(i), ' loaded successfully.']);
-    else
-        disp(['Failed to load data chunk starting at index ', num2str(i)]);
+    for i = 1:chunkSize:rowSize*totalRows
+        chunk = rowData0(i:min(i + chunkSize - 1, end));
+        length = uint32(chunkSize);
+        calllib('D4100_usb', 'LoadData', chunk, length, DMDType, deviceNumber);
     end
+    calllib('D4100_usb', 'LoadControl', deviceNumber);
 end
+
+% Repeat the loop N times
+for n = 1:N
+    disp(['Iteration ', num2str(n), ' of ', num2str(N)]);
+    % Load data into the DMD in chunks of 64 KB
+    
+    for i = 1:chunkSize:rowSize*totalRows
+        chunk = rowData1(i:min(i + chunkSize - 1, end));
+        length = uint32(chunkSize);
+        calllib('D4100_usb', 'LoadData', chunk, length, DMDType, deviceNumber);
+    end
+    calllib('D4100_usb', 'LoadControl', deviceNumber);
+end
+
+
+% Clear FIFO buffers before sending data
+result = calllib('D4100_usb', 'ClearFifos', deviceNumber);
+if result == 1
+    disp('FIFO buffers cleared successfully.');
+else
+    disp('Failed to clear FIFO buffers.');
+end
+
 % Unload the library
 unloadlibrary('D4100_usb');

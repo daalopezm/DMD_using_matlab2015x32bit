@@ -31,6 +31,9 @@ __declspec(dllimport) uint32_t GetDriverRev(int16_t DeviceNumber);
 // uint32_t GetFirmwareRev(int16_t DeviceNumber)
 __declspec(dllimport) uint32_t GetFirmwareRev(int16_t DeviceNumber);
 
+// int16_t GetUsbSpeed(int16_t DeviceNumber)
+__declspec(dllimport) int16_t GetUsbSpeed(int16_t DeviceNumber);
+
 // uint32_t GetDLLRev(void)
 __declspec(dllimport) uint32_t GetDLLRev(void);
 
