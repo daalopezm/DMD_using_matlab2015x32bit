@@ -1,0 +1,50 @@
+% This file must be run with matlab R2015a of below, cause D4100_usb.dll is
+% 32 bit compiled library
+% Load the DLL
+dllPath = 'D4100_usb.dll';
+headerPath = 'D4100_usb.h';
+loadlibrary(dllPath, headerPath);
+%%
+% Check the number of connected devices
+numDevices = calllib('D4100_usb', 'GetNumDev');
+disp(['Number of connected devices: ', num2str(numDevices)]);
+
+if numDevices < 1
+    error('No DLP Discovery 4100 Development Platforms connected.');
+end
+version = calllib('D4100_usb', 'GetDLLRev');
+
+% Define the device number
+deviceNumber = int16(0);
+
+% Clear FIFO buffers before sending data
+result = calllib('D4100_usb', 'ClearFifos', deviceNumber);
+if result == 1
+    disp('FIFO buffers cleared successfully.');
+else
+    disp('Failed to clear FIFO buffers.');
+end
+
+% Load control flags
+result = calllib('D4100_usb', 'LoadControl', deviceNumber);
+if result == 1
+    disp('Control flags loaded successfully.');
+else
+    disp('Failed to load control flags.');
+end
+
+% Prepare the row data
+rowData = uint8(randi([0, 255], 1, 500 * 1280)); % Example row data
+length = uint32(length(rowData));
+DMDType = int16(0); % Example DMD type, you should get the correct type from GetDMDTYPE
+
+% Load data into the DMD
+result = calllib('D4100_usb', 'LoadData', rowData, length, DMDType, deviceNumber);
+if result == 1
+    disp('Data loaded successfully.');
+else
+    disp('Failed to load data.');
+end
+
+% Unload the library
+unloadlibrary('D4100_usb');
