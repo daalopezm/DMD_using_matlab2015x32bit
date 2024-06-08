@@ -1,0 +1,200 @@
+; Installation INF for the Cypress Generic USB Driver for %OPERATING_SYSTEM%
+; Processor support for %PLATFORM% platforms.
+;
+; (c) Copyright 2012, 2013, 2015 Cypress Semiconductor Corporation
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=USB
+ClassGUID={36FC9E60-C465-11CF-8056-444553540000}
+provider=%CYUSB3_Provider%
+CatalogFile=d4100-usb.cat
+DriverVer=04/21/2016,1.1.0.0
+
+[SourceDisksNames]
+1=%CYUSB3_Install%,,,
+
+[SourceDisksFiles]
+CYUSB3.sys = 1
+D4100Loader.sys = 1
+
+[DestinationDirs]
+CYUSB3.Files.Ext = 10,System32\Drivers
+D4100Loader.Files.Ext = 10,System32\Drivers
+
+[ControlFlags]
+ExcludeFromSelect = *
+
+[Manufacturer]
+%CYUSB3_Provider%=Device,NT,NTx86,NTamd64
+
+;for all platforms
+[Device.NT]
+%D4100Loader.DeviceDesc%=D4100Loader, USB\VID_0451&PID_AF32
+%D4100Explorer.DeviceDesc%=CyUsb3, USB\VID_0451&PID_AF33
+
+;for x86 platforms
+[Device.NTx86]
+%D4100Loader.DeviceDesc%=D4100Loader, USB\VID_0451&PID_AF32
+%D4100Explorer.DeviceDesc%=CyUsb3, USB\VID_0451&PID_AF33
+
+;for x64 platforms
+[Device.NTamd64]
+%D4100Loader.DeviceDesc%=D4100Loader, USB\VID_0451&PID_AF32
+%D4100Explorer.DeviceDesc%=CyUsb3, USB\VID_0451&PID_AF33
+
+[CYUSB3.NT]
+CopyFiles=CYUSB3.Files.Ext
+AddReg=CyUsb3.AddReg
+
+[CYUSB3.NT.HW]
+AddReg=CYUSB3.AddReg.Guid
+
+[CYUSB3.NT.Services]
+Addservice = CYUSB3,2,CYUSB3.AddService
+
+[CYUSB3.NTx86]
+CopyFiles=CYUSB3.Files.Ext
+AddReg=CyUsb3.AddReg
+
+[CYUSB3.NTx86.HW]
+AddReg=CYUSB3.AddReg.Guid
+
+[CYUSB3.NTx86.Services]
+Addservice = CYUSB3,2,CYUSB3.AddService
+
+[CYUSB3.NTamd64]
+CopyFiles=CYUSB3.Files.Ext
+AddReg=CyUsb3.AddReg
+
+[CYUSB3.NTamd64.HW]
+AddReg=CYUSB3.AddReg.Guid
+
+[CYUSB3.NTamd64.Services]
+Addservice = CYUSB3,2,CYUSB3.AddService
+
+[CYUSB3.AddReg]
+; Deprecating - do not use in new apps to identify a CYUSB3 driver
+HKR,,DevLoader,,*ntkern
+HKR,,NTMPDriver,,CYUSB3.sys
+; You may optionally include a check for DriverBase in your application to check for a CYUSB3 driver
+HKR,,DriverBase,,CYUSB3.sys
+HKR,"Parameters","MaximumTransferSize",0x10001,4096
+HKR,"Parameters","DebugLevel",0x10001,2
+HKR,,FriendlyName,,%CYUSB3_Description%
+
+[CYUSB3.AddService]
+DisplayName    = %CYUSB3_Description%
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %10%\System32\Drivers\CYUSB3.sys
+AddReg         = CYUSB3.AddReg
+LoadOrderGroup = Base
+
+[CYUSB3.Files.Ext]
+CYUSB3.sys
+
+[D4100Loader.AddReg.Guid]
+HKR,,DriverGUID,,%D4100Loader.GUID%
+;HKR,,DriverPowerPolicySetup,,%ENABLE_DRIVER_POWER_POLICY%
+
+[D4100Loader.NT]
+CopyFiles=D4100Loader.Files.Ext
+AddReg=D4100Loader.AddReg
+
+[D4100Loader.NT.HW]
+AddReg=D4100Loader.AddReg.Guid
+
+[D4100Loader.NT.Services]
+Addservice = D4100Loader,2,D4100Loader.AddService
+
+[D4100Loader.NTx86]
+CopyFiles=D4100Loader.Files.Ext
+AddReg=D4100Loader.AddReg
+
+[D4100Loader.NTx86.HW]
+AddReg=D4100Loader.AddReg.Guid
+
+[D4100Loader.NTx86.Services]
+Addservice = D4100Loader,2,D4100Loader.AddService
+
+[D4100Loader.NTamd64]
+CopyFiles=D4100Loader.Files.Ext
+AddReg=D4100Loader.AddReg
+
+[D4100Loader.NTamd64.HW]
+AddReg=D4100Loader.AddReg.Guid
+
+[D4100Loader.NTamd64.Services]
+Addservice = D4100Loader,2,D4100Loader.AddService
+
+[D4100Loader.AddReg]
+; Deprecating - do not use in new apps to identify a D4100Loader driver
+HKR,,DevLoader,,*ntkern
+HKR,,NTMPDriver,,D4100Loader.sys
+; You may optionally include a check for DriverBase in your application to check for a D4100Loader driver
+HKR,,DriverBase,,D4100Loader.sys
+HKR,"Parameters","MaximumTransferSize",0x10001,4096
+HKR,"Parameters","DebugLevel",0x10001,2
+HKR,,FriendlyName,,%CYUSB3_Description%
+
+[D4100Loader.AddService]
+DisplayName    = %D4100Loader_Description%
+ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
+StartType      = 3                  ; SERVICE_DEMAND_START
+ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %10%\System32\Drivers\D4100Loader.sys
+AddReg         = D4100Loader.AddReg
+LoadOrderGroup = Base
+
+[D4100Loader.Files.Ext]
+D4100Loader.sys
+
+[D4100Loader.AddReg.Guid]
+HKR,,DriverGUID,,%D4100Loader.GUID%
+;HKR,,DriverPowerPolicySetup,,%ENABLE_DRIVER_POWER_POLICY%
+
+;-------------- WDF Coinstaller installation
+[SourceDisksFiles]
+WdfCoInstaller01011.dll=1 ; make sure the number matches with SourceDisksNames
+
+[DestinationDirs]
+CoInstaller_CopyFiles = 11
+
+[CYUSB3.NTamd64.CoInstallers]
+AddReg=CoInstaller_AddReg
+CopyFiles=CoInstaller_CopyFiles
+
+[CYUSB3.NTx86.CoInstallers]
+AddReg=CoInstaller_AddReg
+CopyFiles=CoInstaller_CopyFiles
+
+[CoInstaller_CopyFiles]
+WdfCoInstaller01011.dll
+
+[CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller01011.dll,WdfCoInstaller"
+
+[CYUSB3.NTamd64.Wdf]
+KmdfService = CYUSB3, CYUSB3_wdfsect
+
+[CYUSB3.NTx86.Wdf]
+KmdfService = CYUSB3, CYUSB3_wdfsect
+
+[CYUSB3_wdfsect]
+KmdfLibraryVersion = 1.11
+
+
+[Strings]
+CYUSB3_Provider    = "Digital Light Innovations"
+CYUSB3_Description = "DLi USB Driver"
+CYUSB3_Install     = "DLi USB Driver Installation Disk"
+D4100Loader.DeviceDesc="TI D4100 Loader"
+D4100Explorer.DeviceDesc="TI D4100 Explorer"
+
+D4100Loader.GUID="{36FC9E60-C465-11CF-8056-444553540000}" 
+CYUSB3.GUID="{AE18AA60-7F6A-11d4-97DD-00010229B959}"
+;ENABLE_DRIVER_POWER_POLICY="1"
+CYUSB3_Unused      = "."
