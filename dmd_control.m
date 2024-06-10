@@ -27,8 +27,8 @@ chunkSize = 50 * rowSize;  % 64 Kilobits chunks for DLP650LNIR
 
 % Generate random data to simulate the row data
 %rowData = uint8(randi([0, 255], totalRows * rowSize, 1));
-rowData0 = uint8(0 * ones(1, totalRows * rowSize/8));
-rowData1 = uint8(255 * ones(1, totalRows * rowSize/8));
+rowData0 = uint8(0 * ones(1, totalRows * rowSize));
+rowData1 = uint8(240 * ones(1, totalRows * rowSize));
 % Get DMD type
 DMDType = calllib('D4100_usb', 'GetDMDTYPE', deviceNumber);  % Example value for DLP650LNIR, replace with actual DMD type
 length = uint32(chunkSize);
@@ -51,21 +51,19 @@ calllib('D4100_usb', 'LoadControl', deviceNumber);
 %calllib('D4100_usb', 'SetNSFLIP', 0, deviceNumber);
 %calllib('D4100_usb', 'LoadControl', deviceNumber);
 
-calllib('D4100_usb', 'SetRowMd', 1, deviceNumber);
-calllib('D4100_usb', 'SetNSFLIP', 0, deviceNumber);
-calllib('D4100_usb', 'LoadControl', deviceNumber);
+%calllib('D4100_usb', 'SetRowMd', 1, deviceNumber);
+%calllib('D4100_usb', 'SetNSFLIP', 0, deviceNumber);
+%calllib('D4100_usb', 'LoadControl', deviceNumber);
 
 calllib('D4100_usb', 'ClearFifos', deviceNumber);
-for i = 1:chunkSize/8:rowSize*totalRows/8
-    chunk = rowData1(i:min(i + chunkSize/8 - 1, end));
+for i = 1:chunkSize:rowSize*totalRows
+    chunk = rowData1(i:min(i + chunkSize - 1, end));
     length = uint32(chunkSize);
     %calllib('D4100_usb', 'ClearFifos', deviceNumber);
     calllib('D4100_usb', 'LoadData', chunk, length, DMDType, deviceNumber);
-
-    calllib('D4100_usb', 'SetBlkMd', int16(3), deviceNumber); 
-    calllib('D4100_usb', 'SetBlkAd', int16(8), deviceNumber);
-    calllib('D4100_usb', 'LoadControl', deviceNumber);
 end
-
+calllib('D4100_usb', 'SetBlkMd', int16(3), deviceNumber); 
+calllib('D4100_usb', 'SetBlkAd', int16(8), deviceNumber);
+calllib('D4100_usb', 'LoadControl', deviceNumber);
 % Unload the library
 unloadlibrary('D4100_usb');
