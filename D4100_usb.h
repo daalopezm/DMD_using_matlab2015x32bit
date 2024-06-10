@@ -1,6 +1,6 @@
 #ifndef D4100_USB_H
 #define D4100_USB_H
-//#include "RegisterDefines.h"
+#include "RegisterDefines.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
