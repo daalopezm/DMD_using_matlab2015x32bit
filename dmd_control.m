@@ -23,37 +23,39 @@ calllib('D4100_usb', 'ClearFifos', deviceNumber);
 % and 1280 micromirrors per row. Total data size is 800 * 1280 bits = 1,024,000 bits.
 totalRows = 16 * 50;
 rowSize = 1280;
-chunkSize = 64000;  % 64 kbytes chunks for DLP650LNIR, namely half of the screen
+% a chunk should be at most 640000bits
+chunkSize = 512000/8;  % 640 kilobits chunks for DLP650LNIR
 length = uint32(chunkSize);
 
 % Generate data to simulate the row data
 rowData0 = uint8(0 * ones(1, totalRows * rowSize/8));
-rowData1 = uint8(255 * ones(1, totalRows * rowSize/8));
+rowData1 = uint8(31 * ones(1, totalRows * rowSize/8));
 %rowData2 = image_to_bin('image.jpg');
 
 % Get DMD type
 DMDType = calllib('D4100_usb', 'GetDMDTYPE', deviceNumber);  % Example value for DLP650LNIR, replace with actual DMD type
-calllib('D4100_usb', 'SetWDT', 0, deviceNumber); % Desable watchdog timmer, atached to interrupcions
+calllib('D4100_usb', 'SetWDT', 0, deviceNumber); % Disable watchdog timmer, atached to interrupcions
 
-calllib('D4100_usb', 'SetTPGEnable', 0, deviceNumber); % Desable the internal pattern generation
+calllib('D4100_usb', 'SetTPGEnable', 0, deviceNumber); % Disable the internal pattern generation
 
 calllib('D4100_usb', 'SetBlkMd', 0, deviceNumber); % DMD Block Operations -- NOP
 calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Execute!
 
-%calllib('D4100_usb', 'SetRowMd', 3, deviceNumber); % Set First row address
-%calllib('D4100_usb', 'SetNSFLIP', 0, deviceNumber); % Causes the DLPC410 to reverse order of row loading, effectively flipping the image
-%calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Execute!
-
-calllib('D4100_usb', 'SetRowMd', 1, deviceNumber); %If RowMd==1 and NSFLIP==0 Increment internal row address by '1' - write concurrent data into that row
-calllib('D4100_usb', 'SetNSFLIP', 1, deviceNumber);
-calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Execute!
 
 i=1;
 
 %load first half of the screen
-chunk1 = rowData0(1:chunkSize);
+chunk = rowData(1:chunkSize);
+calllib('D4100_usb', 'SetRowMd', 3, deviceNumber); % Set First row address
+calllib('D4100_usb', 'SetNSFLIP', 0, deviceNumber); % Causes the DLPC410 to reverse order of row loading, effectively flipping the image
+calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Execute!
+
+calllib('D4100_usb', 'SetRowMd', 1, deviceNumber); %If RowMd==1 and NSFLIP==0 Increment internal row address by '1' - write concurrent data into that row
+calllib('D4100_usb', 'SetNSFLIP', 0, deviceNumber);
+calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Execute!
+
 calllib('D4100_usb', 'ClearFifos', deviceNumber);
-calllib('D4100_usb', 'LoadData', chunk1, length, DMDType, deviceNumber);
+calllib('D4100_usb', 'LoadData', chunk, length, DMDType, deviceNumber);
 calllib('D4100_usb', 'SetBlkMd', int16(3), deviceNumber); 
 calllib('D4100_usb', 'SetBlkAd', int16(8), deviceNumber);
 calllib('D4100_usb', 'LoadControl', deviceNumber);
@@ -66,13 +68,18 @@ calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Exe
 %calllib('D4100_usb', 'SetNSFLIP', 0, deviceNumber); % Causes the DLPC410 to reverse order of row loading, effectively flipping the image
 %calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Execute!
 
-calllib('D4100_usb', 'SetRowMd', 1, deviceNumber); %If RowMd==1 and NSFLIP==0 Increment internal row address by '1' - write concurrent data into that row
-calllib('D4100_usb', 'SetNSFLIP', 1, deviceNumber);
-calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Execute!
 %load second half of the screen
-chunk2 = rowData1(chunkSize+1:end);
-%calllib('D4100_usb', 'ClearFifos', deviceNumber);
-calllib('D4100_usb', 'LoadData', chunk2, length, DMDType, deviceNumber);
+chunk = rowData0(chunkSize+1:end);
+calllib('D4100_usb', 'SetRowMd', 2, deviceNumber); %If RowMd==1 and NSFLIP==0 Increment internal row address by '1' - write concurrent data into that row
+calllib('D4100_usb', 'SetRowAddr', 400, deviceNumber);
+calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Execute!
+
+calllib('D4100_usb', 'SetRowMd', 1, deviceNumber); %If RowMd==1 and NSFLIP==0 Increment internal row address by '1' - write concurrent data into that row
+calllib('D4100_usb', 'SetNSFLIP', 0, deviceNumber);
+calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Execute!
+
+calllib('D4100_usb', 'ClearFifos', deviceNumber);
+calllib('D4100_usb', 'LoadData', chunk, length, DMDType, deviceNumber);
 calllib('D4100_usb', 'SetBlkMd', int16(3), deviceNumber); 
 calllib('D4100_usb', 'SetBlkAd', int16(8), deviceNumber);
 calllib('D4100_usb', 'LoadControl', deviceNumber);
