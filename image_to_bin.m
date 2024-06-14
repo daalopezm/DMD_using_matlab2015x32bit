@@ -1,6 +1,7 @@
 function binaryImgArray = image_to_bin(imagePath)
     % Load the image
     img = imread(imagePath);
+    %img = imread('Test Images/ironmaiden.JPG');
 
     % Resize the image to 1280x800
     resizedImg = imresize(img, [800, 1280]);
@@ -15,7 +16,7 @@ function binaryImgArray = image_to_bin(imagePath)
     % Binarize the image using a global threshold
     threshold = graythresh(grayImg); % Calculate global threshold using Otsu's method
     binaryImg = im2bw(grayImg, threshold);
-    uint8binaryImg = reshape(binaryImg, [], 8);
+    uint8binaryImg = reshape(binaryImg',8,[])';
     
     % Display the original, resized, and binary images
     binaryImgArray = uint8(uint8binaryImg * (2.^(7:-1:0))')';
