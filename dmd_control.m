@@ -4,7 +4,7 @@
 dllPath = 'D4100_usb.dll';
 headerPath = 'D4100_usb.h';
 loadlibrary(dllPath, headerPath);
-%%
+
 % Check the number of connected devices
 numDevices = calllib('D4100_usb', 'GetNumDev');
 disp(['Number of connected devices: ', num2str(numDevices)]);
@@ -30,7 +30,7 @@ length = uint32(chunkSize);
 % Generate data to simulate the row data
 rowData0 = uint8(0 * ones(1, totalRows * rowSize/8));
 rowData1 = uint8(31 * ones(1, totalRows * rowSize/8));
-%rowData2 = image_to_bin('image.jpg');
+rowData2 = image_to_bin('Test Images/image.jpg');
 
 % Get DMD type
 DMDType = calllib('D4100_usb', 'GetDMDTYPE', deviceNumber);  % Example value for DLP650LNIR, replace with actual DMD type
@@ -45,7 +45,7 @@ calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Exe
 i=1;
 
 %load first half of the screen
-chunk = rowData(1:chunkSize);
+chunk = rowData2(1:chunkSize);
 calllib('D4100_usb', 'SetRowMd', 3, deviceNumber); % Set First row address
 calllib('D4100_usb', 'SetNSFLIP', 0, deviceNumber); % Causes the DLPC410 to reverse order of row loading, effectively flipping the image
 calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Execute!
@@ -69,7 +69,7 @@ calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Exe
 %calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Execute!
 
 %load second half of the screen
-chunk = rowData0(chunkSize+1:end);
+chunk = rowData2(chunkSize+1:end);
 calllib('D4100_usb', 'SetRowMd', 2, deviceNumber); %If RowMd==1 and NSFLIP==0 Increment internal row address by '1' - write concurrent data into that row
 calllib('D4100_usb', 'SetRowAddr', 400, deviceNumber);
 calllib('D4100_usb', 'LoadControl', deviceNumber); % DMD Block Operations -- Execute!
